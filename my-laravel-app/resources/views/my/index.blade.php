@@ -7,6 +7,7 @@
             <nav class="panel panel-default">
                 <div class="panel-heading"></div>
                 <table class="table">
+                    {{Auth::user()->store_flg}}
                     <thead>
                         <tr>
                             <th scope="col">サムネイル</th>
@@ -23,13 +24,13 @@
                                 <video height="100px" controls src="{{ cdn('storage'.$uploadDir.$movie->id.'/'.$movie->movie_file) }}"></video>
                             </td>
                             <td>
-                             公開
+                                <span class="label {{ $movie->status_class }}">{{ $movie->status_label }}</span>
                             </td>
                             <td>
-                                <a href="{{ route('movie.edit', $movie->id) }}" class="btn btn-primary btn-xs">プレビュー</a>
+                                <a href="{{ route('movie.preview.index', $movie->id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">プレビュー</a>
                             </td>
                             <td>
-                                <a href="{{ route('movie.edit', $movie->id) }}" class="btn btn-primary btn-xs">編集</a>
+                                <a href="{{ route('movie.edit.index', $movie->id) }}" class="btn btn-primary btn-xs">編集</a>
                             </td>
                             <td>
                                 {!! Form::open(['route' => ['movie.delete', 'id' => $movie->id], 'method' => 'delete'])

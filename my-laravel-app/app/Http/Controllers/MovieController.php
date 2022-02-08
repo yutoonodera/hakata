@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateMovieRequest;
 use App\Http\Requests\UpdateMovieSaleRequest;
+use App\Http\Requests\UpdateMovieRequest;
 use App\Movie;
 use Illuminate\Support\Facades\Storage;
 
@@ -59,6 +60,19 @@ class MovieController extends Controller
         'id' => $id,
         ]);
     }
+    public function detail($id)
+    {
+        $movie = Movie::findOrFail($id);
+        $days = $this->dayDiff($movie->end_date, $movie->start_date) + 1;
+        //TODO
+        return view('movie.detail.index', [
+            'id' => $id,
+            'movie' => $movie,
+            'days' => $days,
+            'open' => Movie::OPEN_STATUS,
+            'uploadDir' => Movie::UPLOAD_DIR,
+        ]);
+    }
 
     public function confirm($id)
     {
@@ -66,6 +80,19 @@ class MovieController extends Controller
         $days = $this->dayDiff($movie->end_date, $movie->start_date) + 1;
         //TODO
         return view('movie.confirm.index', [
+            'id' => $id,
+            'movie' => $movie,
+            'days' => $days,
+            'open' => Movie::OPEN_STATUS,
+            'uploadDir' => Movie::UPLOAD_DIR,
+        ]);
+    }
+    public function preview($id)
+    {
+        $movie = Movie::findOrFail($id);
+        $days = $this->dayDiff($movie->end_date, $movie->start_date) + 1;
+        //TODO
+        return view('movie.preview.index', [
             'id' => $id,
             'movie' => $movie,
             'days' => $days,
@@ -101,10 +128,49 @@ class MovieController extends Controller
 
     public function editForm($id)
     {
-        dd('edit');
         $movie = Movie::findOrFail($id);
-        return view('movie/edit')
+        return view('movie/edit/index')
+        ->with('id', $id)
         ->with('movie', $movie)
         ->with('uploadDir', Movie::UPLOAD_DIR);
+    }
+    public function edit(UpdateMovieRequest $request, $id)
+    {
+        $movie = Movie::findOrFail($id);
+        $movie->fill($request->all())->save();
+
+        // ファイル保存
+        $uploadDir = Movie::UPLOAD_DIR . $movie->id . '/';
+        if ($request->hasFile('thumbnail_file') && $request->file('thumbnail_file')->isValid()) {
+            $thumbFile = $request->file('thumbnail_file');
+            $fileName = Movie::THUMBNAIL_FILE_PREFIX . '_' . uniqid() . '.' . $thumbFile->getClientOriginalExtension();
+            if (!empty($movie->thumbnail_file) && Storage::disk('public')->exists($uploadDir . $movie->thumbnail_file)) {
+                Storage::disk('public')->delete($uploadDir . $movie->thumbnail_file);
+            }
+            Storage::disk('public')->put($uploadDir . $fileName, file_get_contents($thumbFile->getPathname()));
+            $movie->thumbnail_file = $fileName;
+        }
+        if ($request->hasFile('movie_file') && $request->file('movie_file')->isValid()) {
+            $thumbFile = $request->file('movie_file');
+            $fileName = Movie::MOVIE_FILE_PREFIX . '_' . uniqid() . '.' . $thumbFile->getClientOriginalExtension();
+            if (!empty($movie->movie_file) && Storage::disk('public')->exists($uploadDir . $movie->movie_file)) {
+                Storage::disk('public')->delete($uploadDir . $movie->movie_file);
+            }
+            Storage::disk('public')->put($uploadDir . $fileName, file_get_contents($thumbFile->getPathname()));
+            $movie->movie_file = $fileName;
+        }
+        $movie->title = $request->title;
+        $movie->start_date = $request->start_date;
+        $movie->end_date = $request->end_date;
+        $movie->minutes = $request->minutes;
+        $movie->product1 = $request->product1;
+        $movie->price1 = $request->price1;
+        $movie->product2 = $request->product2;
+        $movie->price2 = $request->price2;
+        $movie->save();
+
+        return redirect()->route('movie.confirm.index', [
+            'id' => $id,
+            ]);
     }
 }

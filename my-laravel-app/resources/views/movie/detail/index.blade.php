@@ -10,7 +10,6 @@
     <div class="row">
       <div class="col col-md-offset-3 col-md-6">
         <nav class="panel panel-default">
-          <div class="panel-heading">登録する（１/２）</div>
           <div class="panel-body">
             @if($errors->any())
               {{-- <div class="alert alert-danger">
@@ -19,27 +18,17 @@
                 @endforeach
               </div> --}}
             @endif
-            {!! Form::open(['route' => ['movie.create.file'],'enctype'=>'multipart/form-data'])
-            !!}
               @csrf
               <div class="form-group">
-                <label for="movie_file">動画（必須）</label>
-                {!! Form::file('movie_file') !!}
-                @if ($errors->has('movie_file'))
-                <p class="text-danger">{{$errors->first('movie_file')}}</p>
-                @endif
-               </div>
-              <div class="form-group">
-                <label for="thumbnail_file">サムネイル</label>
-              {!! Form::file('thumbnail_file') !!}
-              @if ($errors->has('thumbnail_file'))<p class="text-danger">{{
-                  $errors->first('thumbnail_file')
-                  }}</p>@endif
-             </div>
-              <div class="text-right">
-                <button type="submit" class="btn btn-primary">登録する</button>
+                <video poster="{{ cdn('storage'.$uploadDir.$movie->id.'/'.$movie->thumbnail_file) }}" height="400px" controls src="{{ cdn('storage'.$uploadDir.$movie->id.'/'.$movie->movie_file) }}"></video>
+                <h4>{{$movie->title}}</h4>
+                {!!  Form::open(['route' => ['movie.confirm.index','id' => $movie->id],'enctype'=>'multipart/form-data'])
+                !!} 
+                <p>{!! Form::radio('product1', $movie->product1, null, ['id' => 'product1']) !!}{{$movie->product1}}{{$movie->price1}}</p>
+                <p>{{$movie->product2}}{{$movie->price2}}</p>
+                <button type="submit" class="btn btn-primary">申込みメールを送る</button>
+                {!! Form::close() !!}
               </div>
-            {!! Form::close() !!}
           </div>
         </nav>
       </div>

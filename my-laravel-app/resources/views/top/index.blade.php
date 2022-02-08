@@ -13,7 +13,9 @@
               <!-- posterでサムネイル指定 -->
               <video width="500" height="500" controls src="{{ cdn('storage'.$uploadDir.$movie->id.'/'.$movie->movie_file) }}"></video>
               @endif
+              <a href="{{ route('movie.detail.index', $movie->id) }}" class="text-muted"> <h4>{{$movie->title}}</h4></a>
             @endforeach
+            
           {{-- </div>
         </nav>
       </div> --}}

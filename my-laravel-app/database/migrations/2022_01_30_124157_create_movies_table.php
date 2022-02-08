@@ -15,7 +15,7 @@ class CreateMoviesTable extends Migration
     {
         Schema::create('movies', function (Blueprint $table) {
             $table->increments('id');
-            //$table->unsignedBigInteger('user_id')->unsigned;
+            $table->unsignedBigInteger('user_id')->unsigned;
             $table->string('movie_file', 255);
             $table->string('thumbnail_file', 255)->nullable();
             $table->integer('status')->default(0);
@@ -28,6 +28,9 @@ class CreateMoviesTable extends Migration
             $table->string('product2', 255)->nullable();
             $table->integer('price2')->nullable();
             $table->timestamps();
+            // 外部キーを設定する
+            $table->foreign('user_id')->references('id')->on('users');
+
         });
     }
 
